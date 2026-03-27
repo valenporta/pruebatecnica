@@ -1,5 +1,5 @@
 const isAdmin = (req, res, next) => {
-  if (req.user.rol !== 1) {
+  if (req.user.rol !== 'ADMIN') {
     return res.status(403).json({ message: 'Requiere rol de administrador' });
   }
   next();

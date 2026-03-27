@@ -19,8 +19,8 @@ jest.mock('../src/models', () => ({
   },
 }));
 
-const adminToken = jwt.sign({ cuil: '20304050607', rol: 1 }, process.env.JWT_SECRET, { expiresIn: '1h' });
-const generalToken = jwt.sign({ cuil: '20112233445', rol: 2 }, process.env.JWT_SECRET, { expiresIn: '1h' });
+const adminToken = jwt.sign({ cuil: '20304050607', rol: 'ADMIN' }, process.env.JWT_SECRET, { expiresIn: '1h' });
+const generalToken = jwt.sign({ cuil: '20112233445', rol: 'GENERAL' }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
 // ─── GET /api/roles (publico) ───────────────────────────────────────
 

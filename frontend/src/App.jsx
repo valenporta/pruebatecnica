@@ -18,7 +18,7 @@ function getRole() {
 function ProtectedRoute({ children, adminOnly }) {
   const role = getRole()
   if (!role) return <Navigate to="/" replace />
-  if (adminOnly && role !== 1) return <Navigate to="/general" replace />
+  if (adminOnly && role !== 'ADMIN') return <Navigate to="/general" replace />
   return children
 }
 

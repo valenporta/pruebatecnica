@@ -6,13 +6,13 @@ process.env.JWT_REFRESH_SECRET = 'test-refresh-secret';
 process.env.JWT_EXPIRES_IN = '1h';
 process.env.JWT_REFRESH_EXPIRES_IN = '7d';
 
-const { Usuario } = require('../src/models');
+const { Usuario, Role } = require('../src/models');
 const app = require('../server');
 
 jest.mock('../src/models', () => ({
   sequelize: { sync: jest.fn() },
   Usuario: { findByPk: jest.fn() },
-  Role: {},
+  Role: { findByPk: jest.fn() },
 }));
 
 describe('POST /api/auth/login', () => {
@@ -20,6 +20,7 @@ describe('POST /api/auth/login', () => {
 
   it('200 - login exitoso con usuario admin', async () => {
     Usuario.findByPk.mockResolvedValue({ cuil: '20304050607', password: 'admin123', rol: 1 });
+    Role.findByPk.mockResolvedValue({ id: 1, descripcion: 'ADMIN' });
 
     const res = await request(app)
       .post('/api/auth/login')
@@ -31,11 +32,12 @@ describe('POST /api/auth/login', () => {
 
     const decoded = jwt.verify(res.body.token, process.env.JWT_SECRET);
     expect(decoded.cuil).toBe('20304050607');
-    expect(decoded.rol).toBe(1);
+    expect(decoded.rol).toBe('ADMIN');
   });
 
   it('200 - login exitoso con usuario general', async () => {
     Usuario.findByPk.mockResolvedValue({ cuil: '20112233445', password: 'general123', rol: 2 });
+    Role.findByPk.mockResolvedValue({ id: 2, descripcion: 'GENERAL' });
 
     const res = await request(app)
       .post('/api/auth/login')
@@ -46,7 +48,7 @@ describe('POST /api/auth/login', () => {
     expect(res.body).toHaveProperty('refreshToken');
 
     const decoded = jwt.verify(res.body.token, process.env.JWT_SECRET);
-    expect(decoded.rol).toBe(2);
+    expect(decoded.rol).toBe('GENERAL');
   });
 
   it('400 - falta cuil', async () => {
@@ -80,6 +82,7 @@ describe('POST /api/auth/login', () => {
 
   it('401 - password incorrecta', async () => {
     Usuario.findByPk.mockResolvedValue({ cuil: '20304050607', password: 'admin123', rol: 1 });
+    Role.findByPk.mockResolvedValue({ id: 1, descripcion: 'ADMIN' });
 
     const res = await request(app)
       .post('/api/auth/login')
@@ -95,7 +98,7 @@ describe('POST /api/auth/refresh', () => {
 
   it('200 - refresh token valido retorna nuevos tokens', async () => {
     const refreshToken = jwt.sign(
-      { cuil: '20304050607', rol: 1 },
+      { cuil: '20304050607', rol: 'ADMIN' },
       process.env.JWT_REFRESH_SECRET,
       { expiresIn: '7d' }
     );
@@ -129,7 +132,7 @@ describe('POST /api/auth/refresh', () => {
 
   it('401 - refresh token expirado', async () => {
     const expiredToken = jwt.sign(
-      { cuil: '20304050607', rol: 1 },
+      { cuil: '20304050607', rol: 'ADMIN' },
       process.env.JWT_REFRESH_SECRET,
       { expiresIn: '0s' }
     );

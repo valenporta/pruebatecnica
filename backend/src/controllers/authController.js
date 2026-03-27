@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { secret, expiresIn, refreshSecret, refreshExpiresIn } = require('../config/auth');
-const { Usuario } = require('../models');
+const { Usuario, Role } = require('../models');
 
 const login = async (req, res) => {
   try {
@@ -19,14 +19,17 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'Credenciales invalidas' });
     }
 
+    const role = await Role.findByPk(usuario.rol);
+    const rolDescripcion = role ? role.descripcion : null;
+
     const token = jwt.sign(
-      { cuil: usuario.cuil, rol: usuario.rol },
+      { cuil: usuario.cuil, rol: rolDescripcion },
       secret,
       { expiresIn }
     );
 
     const refreshToken = jwt.sign(
-      { cuil: usuario.cuil, rol: usuario.rol },
+      { cuil: usuario.cuil, rol: rolDescripcion },
       refreshSecret,
       { expiresIn: refreshExpiresIn }
     );

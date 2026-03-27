@@ -24,7 +24,7 @@ function LoginPage() {
         localStorage.setItem('refreshToken', data.refreshToken)
 
         const payload = JSON.parse(atob(data.token.split('.')[1]))
-        if (payload.rol === 1) {
+        if (payload.rol === 'ADMIN') {
           navigate('/admin')
         } else {
           navigate('/general')
